@@ -1,0 +1,97 @@
+/*
+Noms : Damien Jean (2386708), William Komeiha (2382445)
+       Maxime Grégoire (2385202), Sacha Turgeon (2373772)
+Section : 01
+
+Définition des méthodes de la classe, qui permet la motricité du robot
+PB3 et PB4 envoient les signaux PWM des roues gauche puis droite
+PB5 et PB6 envoient les signaux de direction (0 pour avancer et 1 pour reculer)
+*/
+
+#define F_CPU 8000000L
+#include <avr/io.h>
+#include <util/delay.h>
+#include "robotMotricity.h"
+
+Motors::Motors(uint8_t leftSpeed, uint8_t rightSpeed)
+    : leftSpeed_(leftSpeed), rightSpeed_(rightSpeed)
+{
+    DDRB |= (1 << PB3) | (1 << PB5) | (1 << PB4) | (1 << PB6);
+    setPwm();
+}
+
+void Motors::setPwm(){
+    OCR0A = leftSpeed_;
+    OCR0B = rightSpeed_;
+    TCCR0A = (1 << COM0A1) | (1 << COM0B1) | (1 << WGM00);
+    TCCR0B = (1 << CS01);
+}
+
+void Motors::setLeftSpeed(uint8_t leftSpeed){
+    leftSpeed_ = leftSpeed;
+    OCR0B = leftSpeed_;
+}
+
+void Motors::setRightSpeed(uint8_t rightSpeed){
+    rightSpeed_ = rightSpeed * 1.2;
+    OCR0A = rightSpeed_;
+}
+
+void Motors::setSameSpeed(uint8_t sameSpeed){
+    setLeftSpeed(sameSpeed);
+    setRightSpeed(sameSpeed);
+}
+
+void Motors::setNoSpeed(){
+    setSameSpeed(0);
+}
+
+void Motors::move(Direction direction) {
+    switch (direction) {
+        case Direction::FRONT:
+            PORTB &= ~((1 << PB5) | (1 << PB6));
+            direction_ = Direction::FRONT;
+            break;
+        case Direction::BACK:
+            direction_ = Direction::BACK;
+            PORTB |= (1 << PB5) | (1 << PB6);
+            break;
+        case Direction::LEFT:
+            direction_ = Direction::LEFT;
+            PORTB |= (1 << PB6);
+            PORTB &= ~(1 << PB5);
+            break;
+        case Direction::RIGHT:
+            direction_ = Direction::RIGHT;
+            PORTB |= (1 << PB5);
+            PORTB &= ~(1 << PB6);
+            break;
+    }
+    setPwm();
+}
+
+void Motors::turnLeft90()
+{
+    setSameSpeed(150);
+    move(Direction::LEFT);
+    _delay_ms(1000);
+    setNoSpeed();
+}
+
+void Motors::turnRight90()
+{
+    setSameSpeed(150);
+    move(Direction::RIGHT);
+    _delay_ms(1000);
+    setNoSpeed();
+}
+
+void Motors::boostMotors(Direction direction){
+    setSameSpeed(180);
+    move(direction);
+    _delay_ms(40);
+}
+
+Direction Motors::getDirection(){
+    return direction_;
+}

@@ -1,0 +1,8 @@
+Noms : Damien Jean (2386708), William Komeiha (2382445)
+       Maxime Grégoire (2385202), Sacha Turgeon (2373772)
+Cours: INF1900 - Projet initial de système embarqué
+Section : 01
+
+Le dossier lib contient le code et le makefile pour compiler la librairie utilisée dans ce projet. Il faut "make" avant de l'utiliser.
+
+Le dossier app contient le code pour compléter le parcours ainsi que le makefile pour le compiler. Il suffit de "make" et de "make install" pour l'installer dans le robot.

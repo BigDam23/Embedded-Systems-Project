@@ -1,0 +1,33 @@
+/*
+Noms : Damien Jean (2386708), William Komeiha (2382445)
+       Maxime Grégoire (2385202), Sacha Turgeon (2373772)
+Section : 01
+
+Définition des méthodes de la classe, qui permettent de jouer un son selon une fréquence donnée.
+Broches materielles utilisees:
+PD4 et PD5
+*/
+
+#include "music.h"
+
+void Music::playSound(uint8_t note) {
+    if (note < 45 || note > 81) return;
+    double freq = frequencesNotes[note - 45];
+    uint32_t calculatedTime = (F_CPU / (2. * 256 * freq)) - 1;
+    TCNT1 = 0;
+    OCR1A = calculatedTime;
+    TCCR1A |= (1 << COM1A0);
+    TCCR1B = (1 << WGM12) | (1 << CS12);
+}
+
+void Music::stopSound() {
+    // Desactive la sortie 
+    PORTD &= ~(1 << PD4);
+    TCCR1A &= ~(1 << COM1A0);
+}
+
+Music::Music(){
+    DDRD |= (1 << PD5) | (1 << PD4);
+    PORTD &= ~(1 << PD5);
+    PORTD |= (1 << PD4);
+}
